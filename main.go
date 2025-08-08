@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -66,12 +67,18 @@ func main() {
 	})
 
 	count := 0
+	wg := &sync.WaitGroup{}
 	for {
 		select {
 		case record, ok := <-records:
 			if ok {
 				count++
-				fmt.Fprintf(os.Stderr, "%s\n", pretty.Color(pretty.Pretty(record), nil))
+				wg.Add(1)
+				// We're free to reorder things to print them faster.
+				go func(record json.RawMessage) {
+					defer wg.Done()
+					fmt.Fprintf(os.Stderr, "%s\n", pretty.Color(pretty.Pretty(record), nil))
+				}(record)
 			} else {
 				records = nil
 			}
@@ -87,6 +94,8 @@ func main() {
 			break
 		}
 	}
+
+	wg.Wait()
 
 	fmt.Printf("Found %d total licenses\n", count)
 }
