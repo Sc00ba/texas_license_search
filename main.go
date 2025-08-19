@@ -68,7 +68,7 @@ func main() {
 
 	count := 0
 	wg := &sync.WaitGroup{}
-	for {
+	for records != nil || errs != nil {
 		select {
 		case record, ok := <-records:
 			if ok {
@@ -88,10 +88,6 @@ func main() {
 			} else {
 				errs = nil
 			}
-		}
-
-		if records == nil && errs == nil {
-			break
 		}
 	}
 
