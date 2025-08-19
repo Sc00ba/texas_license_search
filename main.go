@@ -74,10 +74,10 @@ func main() {
 			if ok {
 				count++
 				wg.Add(1)
-				// We're free to reorder things to print them faster.
+				// We're free to reorder things, so we'll color and format in parallel.
 				go func(record json.RawMessage) {
 					defer wg.Done()
-					fmt.Fprintf(os.Stderr, "%s\n", pretty.Color(pretty.Pretty(record), nil))
+					fmt.Fprintf(os.Stdout, "%s\n", pretty.Color(pretty.Pretty(record), nil))
 				}(record)
 			} else {
 				records = nil
